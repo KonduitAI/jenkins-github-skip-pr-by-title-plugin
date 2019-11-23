@@ -11,14 +11,12 @@ import org.jenkinsci.plugins.github_branch_source.GitHubSCMBuilder;
 import org.jenkinsci.plugins.github_branch_source.GitHubSCMSourceRequest;
 import org.jenkinsci.plugins.github_branch_source.PullRequestSCMHead;
 
-import org.kohsuke.github.GHPullRequestReview;
-import org.kohsuke.github.GHRepository;
-import org.kohsuke.github.PagedIterable;
+import org.kohsuke.github.*;
 import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.github.GHPullRequest;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
+import java.util.List;
 
 
 public class GitHubPullRequestSkipTrait extends SCMSourceTrait {
@@ -105,7 +103,7 @@ public class GitHubPullRequestSkipTrait extends SCMSourceTrait {
 
                 boolean checkPrTitle = prTitle.matches("(?i).*\\[(wip|ci[\\- _]skip|skip[\\- _]ci)\\].*");
 
-                // TODO: enable this one 1.99 version or later released
+                // TODO: enable this one once github-api 1.99 version or later is released
                 boolean draftPr = false; //pullRequest.isDraft();
 
                 // we are NOT triggering Jenkins if there were no reviews yet
@@ -113,8 +111,18 @@ public class GitHubPullRequestSkipTrait extends SCMSourceTrait {
                 if (reviews == null || reviews.asList() == null || reviews.asList().size() == 0)
                     return true;
 
+                // we want to have at least 1 approved review before running Jenkins
+                boolean anyApproved = false;
+                List<GHPullRequestReview> reviewsList = reviews.asList();
+                for (GHPullRequestReview review: reviews) {
+                    GHPullRequestReviewState reviewState = review.getState();
+
+                    if (reviewState == GHPullRequestReviewState.APPROVED)
+                        anyApproved = true;
+                }
+
                 // we skip triggering Jenkins if there's WIP word in PR title, or that's draft PR.
-                return (checkPrTitle || draftPr);
+                return (checkPrTitle || draftPr || !anyApproved);
             }
 
             return false;
