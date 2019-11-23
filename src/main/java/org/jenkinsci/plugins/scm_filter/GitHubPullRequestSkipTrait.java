@@ -114,7 +114,7 @@ public class GitHubPullRequestSkipTrait extends SCMSourceTrait {
                 // we want to have at least 1 approved review before running Jenkins
                 boolean anyApproved = false;
                 List<GHPullRequestReview> reviewsList = reviews.asList();
-                for (GHPullRequestReview review: reviews) {
+                for (GHPullRequestReview review: reviewsList) {
                     GHPullRequestReviewState reviewState = review.getState();
 
                     if (reviewState == GHPullRequestReviewState.APPROVED)
