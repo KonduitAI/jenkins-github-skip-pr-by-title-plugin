@@ -11,7 +11,9 @@ import org.jenkinsci.plugins.github_branch_source.GitHubSCMBuilder;
 import org.jenkinsci.plugins.github_branch_source.GitHubSCMSourceRequest;
 import org.jenkinsci.plugins.github_branch_source.PullRequestSCMHead;
 
+import org.kohsuke.github.GHPullRequestReview;
 import org.kohsuke.github.GHRepository;
+import org.kohsuke.github.PagedIterable;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.github.GHPullRequest;
 
@@ -103,11 +105,16 @@ public class GitHubPullRequestSkipTrait extends SCMSourceTrait {
 
                 boolean checkPrTitle = prTitle.matches("(?i).*\\[(wip|ci[\\- _]skip|skip[\\- _]ci)\\].*");
 
-                boolean draftPr = pullRequest.isDraft();
+                // TODO: enable this one 1.99 version or later released
+                boolean draftPr = false; //pullRequest.isDraft();
 
-                boolean skipPrCheckResult = (checkPrTitle || draftPr);
+                // we are NOT triggering Jenkins if there were no reviews yet
+                PagedIterable<GHPullRequestReview> reviews = pullRequest.listReviews();
+                if (reviews == null || reviews.asList() == null || reviews.asList().size() == 0)
+                    return true;
 
-                return skipPrCheckResult;
+                // we skip triggering Jenkins if there's WIP word in PR title, or that's draft PR.
+                return (checkPrTitle || draftPr);
             }
 
             return false;
