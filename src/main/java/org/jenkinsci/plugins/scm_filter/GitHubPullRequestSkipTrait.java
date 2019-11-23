@@ -97,7 +97,14 @@ public class GitHubPullRequestSkipTrait extends SCMSourceTrait {
                 int prNumber = Integer.parseInt(scmHead.getName().substring(3));
 
                 String prTitle = repository.getPullRequest(prNumber).getTitle();
-                return prTitle.matches("(?i).*\\[(wip|ci[\\- _]skip|skip[\\- _]ci)\\].*");
+
+                boolean checkPrTitle = prTitle.matches("(?i).*\\[(wip|ci[\\- _]skip|skip[\\- _]ci)\\].*");
+
+                boolean draftPr = repository.getPullRequest(prNumber).isDraft();
+
+                boolean skipPrCheckResult = (checkPrTitle || draftPr);
+
+                return skipPrCheckResult;
             }
 
             return false;
