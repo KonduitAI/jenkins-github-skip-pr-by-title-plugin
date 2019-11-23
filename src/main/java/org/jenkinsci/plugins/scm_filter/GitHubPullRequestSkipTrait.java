@@ -13,6 +13,7 @@ import org.jenkinsci.plugins.github_branch_source.PullRequestSCMHead;
 
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.github.GHPullRequest;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -96,11 +97,13 @@ public class GitHubPullRequestSkipTrait extends SCMSourceTrait {
                 // name for pull requests are formatted as "PR-<number>"
                 int prNumber = Integer.parseInt(scmHead.getName().substring(3));
 
-                String prTitle = repository.getPullRequest(prNumber).getTitle();
+                GHPullRequest pullRequest = repository.getPullRequest(prNumber);
+
+                String prTitle = pullRequest.getTitle();
 
                 boolean checkPrTitle = prTitle.matches("(?i).*\\[(wip|ci[\\- _]skip|skip[\\- _]ci)\\].*");
 
-                boolean draftPr = repository.getPullRequest(prNumber).isDraft();
+                boolean draftPr = pullRequest.isDraft();
 
                 boolean skipPrCheckResult = (checkPrTitle || draftPr);
 
