@@ -108,14 +108,17 @@ public class GitHubPullRequestSkipTrait extends SCMSourceTrait {
 
                 // we are NOT triggering Jenkins if there were no reviews yet
                 PagedIterable<GHPullRequestReview> reviews = pullRequest.listReviews();
-                if (reviews == null || reviews.asList() == null || reviews.asList().size() == 0)
+                if (reviews == null || reviews.asList() == null || reviews.asList().size() == 0) {
+                    System.out.println("PR [" + prNumber + "] has no reviews. Skipping");
                     return true;
+                }
 
                 // we want to have at least 1 approved review before running Jenkins
                 boolean anyApproved = false;
                 List<GHPullRequestReview> reviewsList = reviews.asList();
                 for (GHPullRequestReview review: reviewsList) {
                     GHPullRequestReviewState reviewState = review.getState();
+                    System.out.println("PR: [" +prNumber + "]; Review by [" + review.getUser().getEmail() + "]; Status: [" + reviewState.toString() + "]");
 
                     if (reviewState == GHPullRequestReviewState.APPROVED)
                         anyApproved = true;
