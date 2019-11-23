@@ -105,6 +105,7 @@ public class GitHubPullRequestSkipTrait extends SCMSourceTrait {
 
                 // TODO: enable this one once github-api 1.99 version or later is released
                 boolean draftPr = false; //pullRequest.isDraft();
+                boolean anyApproved = true;
 
                 // we are NOT triggering Jenkins if there were no reviews yet
                 PagedIterable<GHPullRequestReview> reviews = pullRequest.listReviews();
@@ -112,9 +113,8 @@ public class GitHubPullRequestSkipTrait extends SCMSourceTrait {
                     System.out.println("PR [" + prNumber + "] has no reviews. Skipping");
                     return true;
                 }
-
+/*
                 // we want to have at least 1 approved review before running Jenkins
-                boolean anyApproved = false;
                 List<GHPullRequestReview> reviewsList = reviews.asList();
                 for (GHPullRequestReview review: reviewsList) {
                     GHPullRequestReviewState reviewState = review.getState();
@@ -123,6 +123,7 @@ public class GitHubPullRequestSkipTrait extends SCMSourceTrait {
                     if (reviewState == GHPullRequestReviewState.APPROVED)
                         anyApproved = true;
                 }
+                */
 
                 // we skip triggering Jenkins if there's WIP word in PR title, or that's draft PR.
                 return (checkPrTitle || draftPr || !anyApproved);
